@@ -53,7 +53,10 @@ this is a mock social media app for learning
 
   - You should recieve error messages when data is incorrect
   - You should also get a bad request status when the data is invalid
+  - on error status is 400
 
 - Create Business Process
   - Whatever this may be
   - in this case, register user
+  - business processes are put in try catch statement
+  - on error status is 500
