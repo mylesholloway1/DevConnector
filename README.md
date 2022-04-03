@@ -43,10 +43,11 @@ this is a mock social media app for learning
   - Create a simple get req/res to ensure they are connecting in postman
   - Add these routes to the server.js file
 
-- Creat model
+- Create model
 
   - This is a model folder that will hold all models
-    - These files start with a capital (User.js) for best practice
+  - These files start with a capital (User.js) for best practice
+  - Give ability to read body in server.js with ```app.use(express.json({extended:false}));
 
 - Add validation
 
