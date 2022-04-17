@@ -25,6 +25,8 @@
     "gravatar": "^1.8.2",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^6.2.9",
+    "passport": "^0.5.2",
+    "passport-jwt": "^4.0.0",
     "request": "^2.88.2"
   },
   "devDependencies": {
