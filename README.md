@@ -60,3 +60,35 @@ this is a mock social media app for learning
   - in this case, register user
   - business processes are put in try catch statement
   - on error status is 500
+
+## Adding Authentication
+
+- If they have not already been installed:
+
+  - passport
+  - passport-jwt
+
+- Create A Signed Json Web Token
+
+  - The payload will be the user's id
+  - create secret in config file
+  - if error throw error
+  - else send 200 and token with bearer
+
+- Create Passport middleware
+
+  - Remember you can get the middlewar from passports website
+  - Configure this respectfully
+
+- Create auth route
+
+  - this is a get request for the user data
+  - passport authenticate with jwt
+  - no sessions
+
+- Init Passport Middleware & auth route
+
+  - This is done in server.js
+  - app uses passport initialize
+  - require the middle ware you are about to create
+  - create auth route
