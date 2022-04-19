@@ -12,14 +12,23 @@ const User = require('../../models/User');
 // @access public
 router.get('/:username', async (req, res) => {
   try {
-    const profile = await Profile.findOne({
+    //check if user still exists
+    const user = await User.findOne({
       username: req.params.username,
-    }).populate('user', ['username', 'avatar']);
+    });
+    if (!user) {
+      return res.status(400).send('user does not exist');
+    }
 
+    //using user, check if profile exists
+    const profile = await Profile.findOne({
+      user: user._id,
+    });
     if (!profile) {
       return res.status(400).send('user does not exist');
     }
 
+    //display profiles
     return res.status(200).json(profile);
   } catch (err) {
     console.log(err.message);
