@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const passport = require('passport');
+const request = require('request');
 const { check, validationResult } = require('express-validator');
 const config = require('config');
 
@@ -425,6 +426,38 @@ router.delete(
       await profile.save();
 
       return res.status(200).send(profile);
+    } catch (err) {
+      console.log(err.message);
+      res.status(500).send('server error');
+    }
+  }
+);
+
+// @route  GET /api/profile/github/:githubusername
+// @dsec   get user repositories
+// @access private
+router.get(
+  '/github/:githubusername',
+  passport.authenticate('jwt', { session: false }),
+  (req, res) => {
+    try {
+      const options = {
+        uri: `https://api.github.com/users/${
+          req.params.githubusername
+        }/repos?per_page=5&sort=created:asc&client_id=${config.get(
+          'githubClient'
+        )}&client_secret=${config.get('githubSecret')}`,
+        method: 'GET',
+        headers: { 'user-agent': 'node.js' },
+      };
+
+      request(options, (err, response, body) => {
+        if (err) throw err;
+        if (response.statusCode !== 200) {
+          res.status(400).json({ msg: 'no github account found' });
+        }
+        res.json(JSON.parse(body));
+      });
     } catch (err) {
       console.log(err.message);
       res.status(500).send('server error');
