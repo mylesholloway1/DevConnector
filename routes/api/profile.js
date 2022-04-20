@@ -24,7 +24,7 @@ router.get('/', async (req, res) => {
 });
 
 // @route  GET /api/profile/me
-// @dsec   Get the profile information for one user
+// @dsec   Get the profile information for current user
 // @access private
 router.get(
   '/me',
@@ -50,7 +50,7 @@ router.get(
 );
 
 // @route  POST /api/profile/me
-// @dsec   Create or Update user profile information
+// @dsec   Create or Update profile information for current user
 // @access private
 router.post(
   '/me',
@@ -122,6 +122,311 @@ router.post(
       return res.json(profile);
     } catch (err) {
       console.error(err.message);
+      res.status(500).send('server error');
+    }
+  }
+);
+
+// @route  DELETE /api/profile
+// @dsec   delete profile, user and posts for current user
+// @access private
+router.delete(
+  '/',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      //todo: find and remove posts
+      await Profile.findOneAndRemove({ user: req.user.id });
+
+      await User.findOneAndRemove({ _id: req.user.id });
+
+      return res.status(200).send('Profile and User removed');
+    } catch (err) {
+      console.log(err.message);
+      return res.status(500).json('server error');
+    }
+  }
+);
+
+// @route  PUT /api/profile/experience
+// @dsec   add user experience to profile
+// @access private
+router.put(
+  '/experience',
+  [
+    passport.authenticate('jwt', { session: false }),
+    [
+      check('title', 'Title is required').notEmpty(),
+      check('company', 'Company is required').notEmpty(),
+      check('location', 'Location is required').notEmpty(),
+      check('from', 'from date is required').notEmpty(),
+    ],
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { title, company, location, from, to, current, description } =
+      req.body;
+
+    const NewExp = {
+      title,
+      company,
+      location,
+      from,
+      to,
+      current,
+      description,
+    };
+
+    try {
+      const profile = await Profile.findOne({ user: req.user.id });
+      profile.experience.unshift(NewExp);
+      await profile.save();
+      res.status(200).json(profile);
+    } catch (err) {
+      console.log(err.message);
+      req.status(500).send('server error');
+    }
+  }
+);
+
+// @route  PUT /api/profile/education
+// @dsec   add user eduction to profile
+// @access private
+router.put(
+  '/education',
+  [
+    passport.authenticate('jwt', { session: false }),
+    [
+      check('school', 'school is required').notEmpty(),
+      check('degree', 'degree is required').notEmpty(),
+      check('fieldofstudy', 'fieldofstudy is required').notEmpty(),
+      check('from', 'from date is required').notEmpty(),
+    ],
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    const { school, degree, fieldofstudy, from, to, current, description } =
+      req.body;
+
+    const NewEdu = {
+      school,
+      degree,
+      fieldofstudy,
+      from,
+      to,
+      current,
+      description,
+    };
+
+    try {
+      const profile = await Profile.findOne({ user: req.user.id });
+      profile.education.unshift(NewEdu);
+      await profile.save();
+      res.status(200).json(profile);
+    } catch (err) {
+      console.log(err.message);
+      req.status(500).send('server error');
+    }
+  }
+);
+
+// @route  PUT /api/profile/experience/:exp_id
+// @dsec   update user experience
+// @access private
+router.put(
+  '/experience/:exp_id',
+  [
+    passport.authenticate('jwt', { session: false }),
+    [
+      check('title', 'Title is required').notEmpty(),
+      check('company', 'Company is required').notEmpty(),
+      check('location', 'Location is required').notEmpty(),
+      check('from', 'from date is required').notEmpty(),
+    ],
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { title, company, location, from, to, current, description } =
+      req.body;
+
+    const NewExp = {
+      title,
+      company,
+      location,
+      from,
+      to,
+      current,
+      description,
+    };
+
+    try {
+      let profile = await Profile.findOne({ user: req.user.id });
+      if (!profile) {
+        return req
+          .status(400)
+          .json({ errors: [{ msg: 'Someting went wrong' }] });
+      }
+
+      const expIndex = profile.experience
+        .map(item => item.id)
+        .indexOf(req.params.exp_id);
+
+      if (expIndex == -1) {
+        return res
+          .status(400)
+          .json({ errors: [{ msg: 'Someting went wrong' }] });
+      }
+
+      profile.experience[expIndex] = NewExp;
+      await profile.save();
+
+      return res.status(200).send(profile);
+    } catch (err) {
+      console.log(err.message);
+      res.status(500).send('server error');
+    }
+  }
+);
+
+// @route  PUT /api/profile/education/:edu_id
+// @dsec   update user education
+// @access private
+router.put(
+  '/education/:edu_id',
+  [
+    passport.authenticate('jwt', { session: false }),
+    [
+      check('school', 'school is required').notEmpty(),
+      check('degree', 'degree is required').notEmpty(),
+      check('fieldofstudy', 'fieldofstudy is required').notEmpty(),
+      check('from', 'from date is required').notEmpty(),
+    ],
+  ],
+  async (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    const { school, degree, fieldofstudy, from, to, current, description } =
+      req.body;
+
+    const NewEdu = {
+      school,
+      degree,
+      fieldofstudy,
+      from,
+      to,
+      current,
+      description,
+    };
+
+    try {
+      let profile = await Profile.findOne({ user: req.user.id });
+      if (!profile) {
+        return req
+          .status(400)
+          .json({ errors: [{ msg: 'Someting went wrong' }] });
+      }
+
+      const eduIndex = profile.education
+        .map(item => item.id)
+        .indexOf(req.params.edu_id);
+
+      if (eduIndex == -1) {
+        return res
+          .status(400)
+          .json({ errors: [{ msg: 'Someting went wrong' }] });
+      }
+
+      profile.education[eduIndex] = NewEdu;
+      await profile.save();
+
+      return res.status(200).send(profile);
+    } catch (err) {
+      console.log(err.message);
+      res.status(500).send('server error');
+    }
+  }
+);
+
+// @route  DELETE /api/profile/experience/:exp_id
+// @dsec   delete user experience
+// @access private
+router.delete(
+  '/experience/:exp_id',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      let profile = await Profile.findOne({ user: req.user.id });
+      if (!profile) {
+        return req
+          .status(400)
+          .json({ errors: [{ msg: 'Someting went wrong' }] });
+      }
+
+      const expIndex = profile.experience
+        .map(item => item.id)
+        .indexOf(req.params.exp_id);
+
+      if (expIndex == -1) {
+        return res
+          .status(400)
+          .json({ errors: [{ msg: 'Someting went wrong' }] });
+      }
+
+      profile.experience.splice(expIndex, 1);
+      await profile.save();
+
+      return res.status(200).send(profile);
+    } catch (err) {
+      console.log(err.message);
+      res.status(500).send('server error');
+    }
+  }
+);
+
+// @route  DELETE /api/profile/education/:edu_id
+// @dsec   delete user education
+// @access private
+router.delete(
+  '/education/:edu_id',
+  passport.authenticate('jwt', { session: false }),
+  async (req, res) => {
+    try {
+      let profile = await Profile.findOne({ user: req.user.id });
+      if (!profile) {
+        return req
+          .status(400)
+          .json({ errors: [{ msg: 'Someting went wrong' }] });
+      }
+
+      const eduIndex = profile.education
+        .map(item => item.id)
+        .indexOf(req.params.edu_id);
+
+      if (eduIndex == -1) {
+        return res
+          .status(400)
+          .json({ errors: [{ msg: 'Someting went wrong' }] });
+      }
+
+      profile.education.splice(eduIndex, 1);
+      await profile.save();
+
+      return res.status(200).send(profile);
+    } catch (err) {
+      console.log(err.message);
       res.status(500).send('server error');
     }
   }
