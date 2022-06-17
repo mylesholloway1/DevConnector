@@ -92,3 +92,23 @@ this is a mock social media app for learning
   - app uses passport initialize
   - require the middle ware you are about to create
   - create auth route
+
+## Init Client With React and Concurrently
+
+- create client folder
+
+  - `npx create-react-app client`
+
+- if not already installed:
+
+  - concurrently (as Dev depemdency)
+  - axios
+  - react-router-dom
+  - redux
+  - react-redux
+  - redux-thunk
+  - redux-devtools-extension
+  - moment
+  - react-moment
+
+- add proxy:
